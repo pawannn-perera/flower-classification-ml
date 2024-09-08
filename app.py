@@ -12,43 +12,21 @@ import pandas as pd
 st.markdown("""
     <style>
     .header {
-        font-size: 48px; 
+        font-size:50px; 
         color: #FF4B4B;
-        text-align: center;
-        font-family: 'Arial', sans-serif;
-        margin-top: 20px;
+        text-align:center;
+        font-family: 'Courier New', Courier, monospace;
     }
     .subheader {
-        font-size: 24px;
+        font-size:20px;
         color: #4B7BFF;
-        text-align: center;
-        font-family: 'Arial', sans-serif;
-    }
-    .description {
-        font-size: 18px;
-        text-align: center;
-        font-family: 'Arial', sans-serif;
-        color: #333;
-        margin: 20px;
+        text-align:center;
+        font-family: 'Helvetica', sans-serif;
     }
     .image-container {
         display: flex;
         justify-content: center;
         padding: 20px;
-    }
-    .upload-button {
-        display: block;
-        margin: 20px auto;
-        font-size: 18px;
-        background-color: #4B7BFF;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-align: center;
-        cursor: pointer;
-    }
-    .upload-button:hover {
-        background-color: #357AE8;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -73,7 +51,7 @@ def classify_images(image):
     results_dict = {flower_names[i]: round(float(result[i] * 100), 2) for i in range(len(flower_names))}
 
     # Get the most likely class and format the result
-    outcome = f'The Image belongs to "{flower_names[np.argmax(result)]}" with a confidence score of "{np.max(result) * 100:.2f}%"'
+    outcome = 'The Image belongs to "' + flower_names[np.argmax(result)] + '" with a confidence score of "'+ str(np.max(result)*100)[:5] + '%"'
     return outcome, results_dict
 
 # Page selection
@@ -85,20 +63,19 @@ if page == "Home":
     
     # Small description about flower types
     st.markdown("""
-    <div class="description">
-    This application classifies images of flowers into five categories:
-    - **Daisy**: White petals with a yellow center.
-    - **Dandelion**: Bright yellow petals with a fluffy seed head.
-    - **Rose**: Layered petals with a fragrant scent.
-    - **Sunflower**: Large yellow petals and a dark center.
-    - **Tulip**: Smooth, tulip-shaped petals in various colors.
+    ### Types of Flowers
+    This application is designed to classify images of the following types of flowers:
+    - **Daisy**: Known for its white petals and yellow center.
+    - **Dandelion**: Features bright yellow petals and a fluffy seed head.
+    - **Rose**: Recognizable by its layered petals and often fragrant scent.
+    - **Sunflower**: Characterized by its large yellow petals and dark center.
+    - **Tulip**: Comes in various colors with smooth, tulip-shaped petals.
 
-    Upload clear images of these flowers for the best results.
-    </div>
-    """, unsafe_allow_html=True)
+    Please upload clear images of these flowers for the best classification results.
+    """)
     
     # File uploader for image
-    uploaded_file = st.file_uploader('Upload an Image', label_visibility="collapsed")
+    uploaded_file = st.file_uploader('Upload an Image')
     if uploaded_file is not None:
         # Display the image in the center
         st.markdown('<div class="image-container">', unsafe_allow_html=True)
@@ -122,15 +99,13 @@ elif page == "About":
     # About page content
     st.sidebar.title("About")
     st.markdown("""
-    <div class="description">
     This application uses a pre-trained deep learning model to classify images of flowers into five categories: Daisy, Dandelion, Rose, Sunflower, and Tulip.
 
     ### How to Use
     1. **Upload an Image**: Click the 'Upload an Image' button to choose a flower image from your device. The image should be in common formats such as JPG, PNG, or JPEG.
-    2. **Image Display**: Once uploaded, the image will be displayed for your reference.
-    3. **Classification**: The model will predict the flower type and display the result with a confidence score.
-    4. **Prediction Scores**: Prediction scores will be shown as progress bars for each flower category, representing the model's confidence in each prediction.
+    2. **Image Display**: Once the image is uploaded, it will be displayed in the center of the app for your reference.
+    3. **Classification**: The model will process the image and predict the flower type. The result, including the flower category and confidence score, will be shown prominently on the screen.
+    4. **Prediction Scores**: Below the classification result, you will see prediction scores represented as progress bars for each flower category. These bars illustrate the confidence levels for each class, with a higher bar indicating a higher confidence score.
 
-    Developed with TensorFlow and Keras, this model processes images through a neural network to make predictions. Feel free to upload multiple images to see how the model performs!
-    </div>
-    """, unsafe_allow_html=True)
+    Developed using TensorFlow and Keras, the model processes images by resizing them and passing them through a neural network to make predictions. Feel free to upload multiple images and see how the model performs!
+    """)
