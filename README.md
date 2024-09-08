@@ -1,6 +1,6 @@
 # Flower Classification App
 
-Welcome to the Flower Classification App! This application allows you to classify images of flowers into five categories using a pre-trained deep learning model. The model identifies the type of flower and provides confidence scores for each category.
+Welcome to the Flower Classification App! This application allows you to classify images of flowers into five categories. The model identifies the type of flower and provides confidence scores for each category.
 
 ## Features
 
@@ -28,7 +28,6 @@ Welcome to the Flower Classification App! This application allows you to classif
 
 ## Technical Details
 
-- **Model**: The application uses a pre-trained deep learning model developed with TensorFlow and Keras.
 - **Image Processing**: Uploaded images are resized to 100x100 pixels before being processed by the model.
 - **Libraries Used**:
   - TensorFlow
