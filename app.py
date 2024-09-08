@@ -16,6 +16,10 @@ st.markdown("""
         color: #FF4B4B;
         text-align:center;
         font-family: 'Courier New', Courier, monospace;
+        background-image: url('https://example.com/background.jpg'); /* Replace with your own image */
+        background-size: cover;
+        padding: 20px;
+        border-radius: 10px;
     }
     .subheader {
         font-size:20px;
@@ -27,6 +31,19 @@ st.markdown("""
         display: flex;
         justify-content: center;
         padding: 20px;
+    }
+    .button {
+        background-color: #4CAF50; 
+        color: white; 
+        border: none; 
+        padding: 10px 20px; 
+        text-align: center; 
+        text-decoration: none; 
+        display: inline-block; 
+        font-size: 16px; 
+        margin: 4px 2px; 
+        cursor: pointer;
+        border-radius: 5px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -55,7 +72,7 @@ def classify_images(image):
     return outcome, results_dict
 
 # Page selection
-page = st.sidebar.selectbox("Select Page", ["Home", "About"])
+page = st.sidebar.selectbox("Select Page", ["Home", "About", "Gallery"])
 
 if page == "Home":
     # Home page content
@@ -75,7 +92,7 @@ if page == "Home":
     """)
     
     # File uploader for image
-    uploaded_file = st.file_uploader('Upload an Image')
+    uploaded_file = st.file_uploader('Upload an Image', type=['jpg', 'png', 'jpeg'])
     if uploaded_file is not None:
         # Display the image in the center
         st.markdown('<div class="image-container">', unsafe_allow_html=True)
@@ -109,3 +126,22 @@ elif page == "About":
 
     Developed using TensorFlow and Keras, the model processes images by resizing them and passing them through a neural network to make predictions. Feel free to upload multiple images and see how the model performs!
     """)
+
+elif page == "Gallery":
+    # Gallery page content
+    st.markdown('<h1 class="header">Flower Image Gallery</h1>', unsafe_allow_html=True)
+    st.markdown("""
+    ### Image Gallery
+    Upload and view images in the gallery to see how the model classifies them. You can also share your images with the community!
+
+    **Upload and View Images:**
+    - Upload multiple images to see how they are classified.
+    - Use the gallery to compare predictions of different images.
+    """)
+    # File uploader for multiple images
+    uploaded_files = st.file_uploader('Upload Images', type=['jpg', 'png', 'jpeg'], accept_multiple_files=True)
+    if uploaded_files:
+        st.markdown('<div class="image-container">', unsafe_allow_html=True)
+        for uploaded_file in uploaded_files:
+            st.image(uploaded_file, width=150)
+        st.markdown('</div>', unsafe_allow_html=True)
