@@ -1,6 +1,6 @@
 import os
 import keras
-import streamlit as st 
+import streamlit as st
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.models import load_model
@@ -37,9 +37,15 @@ st.markdown('<h1 class="header">Flower Classification</h1>', unsafe_allow_html=T
 # About section
 st.sidebar.title("About")
 st.sidebar.info("""
-This application uses a pre-trained deep learning model to classify images of flowers into five categories: Daisy, Dandelion, Rose, Sunflower, and Tulip. 
-Upload an image of a flower, and the model will predict the category with the corresponding confidence score.
-Developed using TensorFlow and Keras, the model processes images by resizing them and passing them through a neural network to make predictions.
+This application uses a pre-trained deep learning model to classify images of flowers into five categories: Daisy, Dandelion, Rose, Sunflower, and Tulip.
+
+### How to Use
+1. **Upload an Image**: Click the 'Upload an Image' button to choose a flower image from your device. The image should be in common formats such as JPG, PNG, or JPEG.
+2. **Image Display**: Once the image is uploaded, it will be displayed in the center of the app for your reference.
+3. **Classification**: The model will process the image and predict the flower type. The result, including the flower category and confidence score, will be shown prominently on the screen.
+4. **Prediction Scores**: Below the classification result, you will see prediction scores represented as progress bars for each flower category. These bars illustrate the confidence levels for each class, with a higher bar indicating a higher confidence score.
+
+Developed using TensorFlow and Keras, the model processes images by resizing them and passing them through a neural network to make predictions. Feel free to upload multiple images and see how the model performs!
 """)
 
 # List of flower names for prediction
