@@ -64,11 +64,11 @@ if page == "Home":
     st.markdown("""
     ### Types of Flowers
     This application is designed to classify images of the following types of flowers:
-    - **Daisy**: Known for its white petals and yellow center.
-    - **Dandelion**: Features bright yellow petals and a fluffy seed head.
-    - **Rose**: Recognizable by its layered petals and often fragrant scent.
-    - **Sunflower**: Characterized by its large yellow petals and dark center.
-    - **Tulip**: Comes in various colors with smooth, tulip-shaped petals.
+    - **Daisy**
+    - **Dandelion**
+    - **Rose**
+    - **Sunflower**
+    - **Tulip**
 
     Please upload clear images of these flowers for the best classification results.
     """)
@@ -98,10 +98,8 @@ elif page == "About":
     # About page content
     st.sidebar.title("About")
     st.markdown("""
-    This application uses a pre-trained deep learning model to classify images of flowers into five categories: Daisy, Dandelion, Rose, Sunflower, and Tulip.
-
     ### How to Use
-    1. **Upload an Image**: Click the 'Upload an Image' button to choose a flower image from your device. The image should be in common formats such as JPG, PNG, or JPEG.
+    1. **Upload an Image**: Click the 'Upload an Image' button to choose a flower (categories: Daisy, Dandelion, Rose, Sunflower, and Tulip) image from your device. The image should be in common formats such as JPG, PNG, or JPEG.
     2. **Image Display**: Once the image is uploaded, it will be displayed in the center of the app for your reference.
     3. **Classification**: The model will process the image and predict the flower type. The result, including the flower category and confidence score, will be shown prominently on the screen.
     4. **Prediction Scores**: Below the classification result, you will see prediction scores represented as progress bars for each flower category. These bars illustrate the confidence levels for each class, with a higher bar indicating a higher confidence score.""")
