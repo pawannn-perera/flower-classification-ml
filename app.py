@@ -60,7 +60,6 @@ if page == "Home":
     # Home page content
     st.markdown('<h1 class="header">Flower Classification</h1>', unsafe_allow_html=True)
     
-    # Small description about flower types
     st.markdown("""
     ### Types of Flowers
     This application is designed to classify images of the following types of flowers:
@@ -95,8 +94,7 @@ if page == "Home":
             st.progress(score / 100)
 
 elif page == "About":
-    # About page content
-    st.sidebar.title("About")
+    
     st.markdown("""
     ### How to Use
     1. **Upload an Image**: Click the 'Upload an Image' button to choose a flower (categories: Daisy, Dandelion, Rose, Sunflower, and Tulip) image from your device. The image should be in common formats such as JPG, PNG, or JPEG.
