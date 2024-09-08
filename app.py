@@ -8,12 +8,11 @@ from PIL import Image
 import io
 import pandas as pd
 
-# Custom CSS to improve aesthetics
 st.markdown("""
     <style>
     .header {
         font-size:50px; 
-        color: #FF4B4B;
+        color: Red;
         text-align:center;
         font-family: 'Courier New', Courier, monospace;
     }
