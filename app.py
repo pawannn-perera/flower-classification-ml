@@ -104,7 +104,4 @@ elif page == "About":
     1. **Upload an Image**: Click the 'Upload an Image' button to choose a flower image from your device. The image should be in common formats such as JPG, PNG, or JPEG.
     2. **Image Display**: Once the image is uploaded, it will be displayed in the center of the app for your reference.
     3. **Classification**: The model will process the image and predict the flower type. The result, including the flower category and confidence score, will be shown prominently on the screen.
-    4. **Prediction Scores**: Below the classification result, you will see prediction scores represented as progress bars for each flower category. These bars illustrate the confidence levels for each class, with a higher bar indicating a higher confidence score.
-
-    Developed using TensorFlow and Keras, the model processes images by resizing them and passing them through a neural network to make predictions. Feel free to upload multiple images and see how the model performs!
-    """)
+    4. **Prediction Scores**: Below the classification result, you will see prediction scores represented as progress bars for each flower category. These bars illustrate the confidence levels for each class, with a higher bar indicating a higher confidence score.""")
