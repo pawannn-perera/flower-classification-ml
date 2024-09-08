@@ -36,3 +36,5 @@ Welcome to the Flower Classification App! This application allows you to classif
   - PIL (Python Imaging Library)
   - NumPy
   - pandas
+
+Streamlit Diployment: https://flowerclassification-ky8izgzsgwvuw8ka8jcse2.streamlit.app/
