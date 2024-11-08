@@ -34,7 +34,7 @@ st.markdown("""
 flower_names = ['Daisy', 'Dandelion', 'Rose', 'Sunflower', 'Tulip']
 
 # Load the pre-trained model
-model = load_model('./model/mymodel.keras')
+model = load_model('model/mymodel.keras')
 
 def classify_images(image):
     # Open and preprocess the image for the model
