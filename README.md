@@ -1,6 +1,4 @@
-# Flower Classification App
-
-Welcome to the Flower Classification App! This application allows you to classify images of flowers into five categories. The model identifies the type of flower and provides confidence scores for each category.
+# Flower Classification Application
 
 ## Features
 
@@ -36,5 +34,3 @@ Welcome to the Flower Classification App! This application allows you to classif
   - PIL (Python Imaging Library)
   - NumPy
   - pandas
-
-Streamlit Diployment: https://flowerclassification-ky8izgzsgwvuw8ka8jcse2.streamlit.app/
