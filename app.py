@@ -3,7 +3,7 @@ import streamlit as st
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-from tensorflow.keras.layers import RandomRotation
+from tensorflow.keras.layers import RandomRotation, RandomFlip, RandomZoom
 from PIL import Image
 
 # Constants
@@ -12,14 +12,27 @@ IMAGE_SIZE = (100, 100)
 SUPPORTED_FORMATS = ['jpg', 'jpeg', 'png']
 MODEL_PATH = './model/mymodel.keras'
 
-# Define a custom RandomRotation layer to handle potential argument issues
+# Custom layer definitions to handle loading issues
 class CustomRandomRotation(RandomRotation):
-    def __init__(self, **kwargs):
-        kwargs.pop('value_range', None)  # Remove 'value_range' if present
-        super().__init__(**kwargs)
+    def __init__(self, factor, **kwargs):
+        # Remove problematic kwargs
+        kwargs.pop('value_range', None)
+        super().__init__(factor, **kwargs)
 
-# Register the custom layer
-custom_objects = {'RandomRotation': CustomRandomRotation}
+class CustomRandomFlip(RandomFlip):
+    def __init__(self, mode='horizontal', **kwargs):
+        super().__init__(mode, **kwargs)
+
+class CustomRandomZoom(RandomZoom):
+    def __init__(self, height_factor, **kwargs):
+        super().__init__(height_factor, **kwargs)
+
+# Register custom objects
+custom_objects = {
+    'RandomRotation': CustomRandomRotation,
+    'RandomFlip': CustomRandomFlip,
+    'RandomZoom': CustomRandomZoom
+}
 
 # Load the pre-trained model with custom objects
 @st.cache_resource
@@ -28,8 +41,24 @@ def load_trained_model():
         if not os.path.exists(MODEL_PATH):
             st.error("Model file not found! Please ensure the model file exists.")
             return None
-            
-        model = load_model(MODEL_PATH, custom_objects=custom_objects)
+
+        # Configure Keras to use the legacy loading behavior
+        tf.keras.utils.disable_interactive_logging()
+        
+        # Load model with custom objects
+        model = load_model(
+            MODEL_PATH,
+            custom_objects=custom_objects,
+            compile=False  # Prevent compilation issues
+        )
+        
+        # Recompile the model with appropriate settings
+        model.compile(
+            optimizer='adam',
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            metrics=['accuracy']
+        )
+        
         st.success("Model loaded successfully!")
         return model
     except Exception as e:
@@ -65,7 +94,7 @@ def classify_images(image, model):
             return None, None
         
         with st.spinner('Making predictions...'):
-            predictions = model.predict(input_image_exp_dim)
+            predictions = model.predict(input_image_exp_dim, verbose=0)
             result = tf.nn.softmax(predictions[0])
 
         # Create a dictionary of prediction scores
