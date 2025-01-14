@@ -134,7 +134,8 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.image(uploaded_file, caption='Uploaded Image', use_column_width=True)
+            # Updated to use use_container_width instead of use_column_width
+            st.image(uploaded_file, caption='Uploaded Image', use_container_width=True)
             
         with col2:
             outcome, results_dict = classify_images(uploaded_file, model)
