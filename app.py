@@ -6,6 +6,12 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import RandomRotation
 from PIL import Image
 
+# Constants
+FLOWER_NAMES = ['Daisy', 'Dandelion', 'Rose', 'Sunflower', 'Tulip']
+IMAGE_SIZE = (100, 100)
+SUPPORTED_FORMATS = ['jpg', 'jpeg', 'png']
+MODEL_PATH = './model/mymodel.keras'
+
 # Define a custom RandomRotation layer to handle potential argument issues
 class CustomRandomRotation(RandomRotation):
     def __init__(self, **kwargs):
@@ -16,93 +22,144 @@ class CustomRandomRotation(RandomRotation):
 custom_objects = {'RandomRotation': CustomRandomRotation}
 
 # Load the pre-trained model with custom objects
+@st.cache_resource
 def load_trained_model():
     try:
-        model = load_model('./model/mymodel.keras', custom_objects=custom_objects)
+        if not os.path.exists(MODEL_PATH):
+            st.error("Model file not found! Please ensure the model file exists.")
+            return None
+            
+        model = load_model(MODEL_PATH, custom_objects=custom_objects)
         st.success("Model loaded successfully!")
         return model
     except Exception as e:
         st.error(f"Error loading model: {str(e)}")
         return None
 
-model = load_trained_model()
-
-# Flower categories
-flower_names = ['Daisy', 'Dandelion', 'Rose', 'Sunflower', 'Tulip']
-
 # Preprocess the image
 def preprocess_image(image):
     try:
-        input_image = Image.open(image).convert('RGB').resize((100, 100))
+        input_image = Image.open(image).convert('RGB').resize(IMAGE_SIZE)
         input_image_array = np.array(input_image) / 255.0  # Normalize to [0, 1]
         input_image_exp_dim = np.expand_dims(input_image_array, axis=0)
         return input_image_exp_dim
+    except IOError as e:
+        st.error(f"Error opening image file: {str(e)}")
+        return None
+    except ValueError as e:
+        st.error(f"Error processing image: {str(e)}")
+        return None
     except Exception as e:
-        st.error(f"Error preprocessing image: {str(e)}")
+        st.error(f"Unexpected error during image preprocessing: {str(e)}")
         return None
 
 # Classify uploaded images
-def classify_images(image):
+def classify_images(image, model):
     try:
+        if model is None:
+            st.error("Model not loaded. Cannot perform classification.")
+            return None, None
+
         input_image_exp_dim = preprocess_image(image)
         if input_image_exp_dim is None:
             return None, None
         
-        predictions = model.predict(input_image_exp_dim)
-        result = tf.nn.softmax(predictions[0])
+        with st.spinner('Making predictions...'):
+            predictions = model.predict(input_image_exp_dim)
+            result = tf.nn.softmax(predictions[0])
 
         # Create a dictionary of prediction scores
-        results_dict = {flower_names[i]: round(float(result[i] * 100), 2) for i in range(len(flower_names))}
+        results_dict = {FLOWER_NAMES[i]: round(float(result[i] * 100), 2) 
+                       for i in range(len(FLOWER_NAMES))}
+        
         # Get the most likely class
-        outcome = f'The Image belongs to "{flower_names[np.argmax(result)]}" with a confidence score of "{np.max(result)*100:.2f}%"'
+        predicted_class = FLOWER_NAMES[np.argmax(result)]
+        confidence = np.max(result) * 100
+        outcome = f'The Image belongs to "{predicted_class}" with a confidence score of "{confidence:.2f}%"'
+        
         return outcome, results_dict
     except Exception as e:
         st.error(f"Classification failed: {str(e)}")
         return None, None
 
-# Streamlit Sidebar for Navigation
-page = st.sidebar.selectbox("Select Page", ["Home", "About"])
+def main():
+    # Load model at startup
+    model = load_trained_model()
 
-if page == "Home":
-    # Home page content
-    st.title("Flower Classification App 🌸")
-    st.write("""
-    Upload an image of a flower to classify it into one of the following categories:
-    - Daisy
-    - Dandelion
-    - Rose
-    - Sunflower
-    - Tulip
-    """)
+    # Streamlit Sidebar for Navigation
+    page = st.sidebar.selectbox("Select Page", ["Home", "About"])
 
-    # File uploader
-    uploaded_file = st.file_uploader('Upload a Flower Image', type=['jpg', 'jpeg', 'png'])
-    if uploaded_file is not None:
-        # Display the uploaded image
-        st.image(uploaded_file, caption='Uploaded Image', use_column_width=True)
+    if page == "Home":
+        # Home page content
+        st.title("Flower Classification App 🌸")
+        st.write("""
+        Upload an image of a flower to classify it into one of the following categories:
+        """)
+        
+        # Display flower categories as bullets
+        for flower in FLOWER_NAMES:
+            st.write(f"- {flower}")
 
-        # Classify the image
-        outcome, results_dict = classify_images(uploaded_file)
+        # File uploader
+        uploaded_file = st.file_uploader(
+            'Upload a Flower Image', 
+            type=SUPPORTED_FORMATS
+        )
+        
+        if uploaded_file is not None:
+            # Create columns for better layout
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Display the uploaded image
+                st.image(uploaded_file, caption='Uploaded Image', use_column_width=True)
 
-        if outcome and results_dict:
-            # Display classification results
-            st.subheader("Classification Result")
-            st.success(outcome)
+            with col2:
+                with st.spinner('Classifying image...'):
+                    # Classify the image
+                    outcome, results_dict = classify_images(uploaded_file, model)
 
-            # Display prediction scores
-            st.subheader("Prediction Scores")
-            for flower, score in results_dict.items():
-                st.write(f"**{flower}**")
-                st.progress(score / 100)
+                if outcome and results_dict:
+                    # Display classification results
+                    st.subheader("Classification Result")
+                    st.success(outcome)
 
-elif page == "About":
-    # About page content
-    st.title("About This App")
-    st.write("""
-    This application uses a pre-trained deep learning model to classify images of flowers into one of five categories: Daisy, Dandelion, Rose, Sunflower, and Tulip.
-    
-    ### How to Use
-    1. **Upload an Image**: Use the file uploader to upload an image of a flower.
-    2. **View Results**: The app will classify the image and display the predicted flower type along with confidence scores.
-    3. **Supported Formats**: JPG, PNG, and JPEG are supported.
-    """)
+            if results_dict:
+                # Display prediction scores
+                st.subheader("Prediction Scores")
+                for flower, score in sorted(results_dict.items(), 
+                                         key=lambda x: x[1], 
+                                         reverse=True):
+                    col1, col2 = st.columns([3, 7])
+                    with col1:
+                        st.write(f"**{flower}**")
+                    with col2:
+                        st.progress(score / 100)
+                        st.write(f"{score}%")
+
+    elif page == "About":
+        # About page content
+        st.title("About This App")
+        st.write("""
+        This application uses a pre-trained deep learning model to classify images 
+        of flowers into five different categories.
+        
+        ### How to Use
+        1. **Upload an Image**: Use the file uploader to upload an image of a flower.
+        2. **View Results**: The app will classify the image and display the predicted 
+           flower type along with confidence scores.
+        3. **Supported Formats**: JPG, PNG, and JPEG are supported.
+        
+        ### Technical Details
+        - The model is built using TensorFlow/Keras
+        - Images are preprocessed to size 100x100 pixels
+        - Predictions are shown with confidence scores for all categories
+        
+        ### Tips for Best Results
+        - Use clear, well-lit images
+        - Ensure the flower is the main subject in the image
+        - Images should be in focus and not blurry
+        """)
+
+if __name__ == "__main__":
+    main()
