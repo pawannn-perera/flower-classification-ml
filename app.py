@@ -4,37 +4,26 @@ import streamlit as st
 import tensorflow as tf
 import numpy as np
 from tensorflow.keras.models import load_model
+from tensorflow.keras.layers import RandomRotation
 from PIL import Image
 import io
 import pandas as pd
 
-st.markdown("""
-    <style>
-    .header {
-        font-size:50px; 
-        color: Red;
-        text-align:center;
-        font-family: 'Courier New', Courier, monospace;
-    }
-    .subheader {
-        font-size:20px;
-        color: #4B7BFF;
-        text-align:center;
-        font-family: 'Helvetica', sans-serif;
-    }
-    .image-container {
-        display: flex;
-        justify-content: center;
-        padding: 20px;
-    }
-    </style>
-""", unsafe_allow_html=True)
+# Custom RandomRotation layer to handle the invalid 'value_range' argument
+class CustomRandomRotation(RandomRotation):
+    def __init__(self, **kwargs):
+        # Remove 'value_range' from kwargs if it exists
+        kwargs.pop('value_range', None)
+        super().__init__(**kwargs)
+
+# Register the custom layer
+custom_objects = {'RandomRotation': CustomRandomRotation}
+
+# Load the pre-trained model with custom objects
+model = load_model('model/mymodel.keras', custom_objects=custom_objects)
 
 # List of flower names for prediction
 flower_names = ['Daisy', 'Dandelion', 'Rose', 'Sunflower', 'Tulip']
-
-# Load the pre-trained model
-model = load_model('model/mymodel.keras')
 
 def classify_images(image):
     # Open and preprocess the image for the model
@@ -94,7 +83,6 @@ if page == "Home":
             st.progress(score / 100)
 
 elif page == "About":
-    
     st.markdown("""
     ### How to Use
     1. **Upload an Image**: Click the 'Upload an Image' button to choose a flower (categories: Daisy, Dandelion, Rose, Sunflower, and Tulip) image from your device. The image should be in common formats such as JPG, PNG, or JPEG.
