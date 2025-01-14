@@ -20,7 +20,7 @@ class CustomRandomRotation(RandomRotation):
 custom_objects = {'RandomRotation': CustomRandomRotation}
 
 # Load the pre-trained model with custom objects
-model = load_model('model/mymodel.keras', custom_objects=custom_objects)
+model = load_model('./model/mymodel.keras', custom_objects=custom_objects)
 
 # List of flower names for prediction
 flower_names = ['Daisy', 'Dandelion', 'Rose', 'Sunflower', 'Tulip']
