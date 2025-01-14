@@ -1,91 +1,108 @@
 import os
-import keras
 import streamlit as st
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import RandomRotation
 from PIL import Image
-import io
-import pandas as pd
 
-# Custom RandomRotation layer to handle the invalid 'value_range' argument
+# Define a custom RandomRotation layer to handle potential argument issues
 class CustomRandomRotation(RandomRotation):
     def __init__(self, **kwargs):
-        # Remove 'value_range' from kwargs if it exists
-        kwargs.pop('value_range', None)
+        kwargs.pop('value_range', None)  # Remove 'value_range' if present
         super().__init__(**kwargs)
 
 # Register the custom layer
 custom_objects = {'RandomRotation': CustomRandomRotation}
 
 # Load the pre-trained model with custom objects
-model = load_model('./model/mymodel.keras', custom_objects=custom_objects)
+def load_trained_model():
+    try:
+        model = load_model('./model/mymodel.keras', custom_objects=custom_objects)
+        st.success("Model loaded successfully!")
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        return None
 
-# List of flower names for prediction
+model = load_trained_model()
+
+# Flower categories
 flower_names = ['Daisy', 'Dandelion', 'Rose', 'Sunflower', 'Tulip']
 
+# Preprocess the image
+def preprocess_image(image):
+    try:
+        input_image = Image.open(image).convert('RGB').resize((100, 100))
+        input_image_array = np.array(input_image) / 255.0  # Normalize to [0, 1]
+        input_image_exp_dim = np.expand_dims(input_image_array, axis=0)
+        return input_image_exp_dim
+    except Exception as e:
+        st.error(f"Error preprocessing image: {str(e)}")
+        return None
+
+# Classify uploaded images
 def classify_images(image):
-    # Open and preprocess the image for the model
-    input_image = Image.open(image).resize((100, 100))
-    input_image_array = np.array(input_image)
-    input_image_exp_dim = np.expand_dims(input_image_array, axis=0)
+    try:
+        input_image_exp_dim = preprocess_image(image)
+        if input_image_exp_dim is None:
+            return None, None
+        
+        predictions = model.predict(input_image_exp_dim)
+        result = tf.nn.softmax(predictions[0])
 
-    # Predict the class of the image
-    predictions = model.predict(input_image_exp_dim)
-    result = tf.nn.softmax(predictions[0])
+        # Create a dictionary of prediction scores
+        results_dict = {flower_names[i]: round(float(result[i] * 100), 2) for i in range(len(flower_names))}
+        # Get the most likely class
+        outcome = f'The Image belongs to "{flower_names[np.argmax(result)]}" with a confidence score of "{np.max(result)*100:.2f}%"'
+        return outcome, results_dict
+    except Exception as e:
+        st.error(f"Classification failed: {str(e)}")
+        return None, None
 
-    # Prepare results as a dictionary for all classes
-    results_dict = {flower_names[i]: round(float(result[i] * 100), 2) for i in range(len(flower_names))}
-
-    # Get the most likely class and format the result
-    outcome = 'The Image belongs to "' + flower_names[np.argmax(result)] + '" with a confidence score of "'+ str(np.max(result)*100)[:5] + '%"'
-    return outcome, results_dict
-
-# Page selection
+# Streamlit Sidebar for Navigation
 page = st.sidebar.selectbox("Select Page", ["Home", "About"])
 
 if page == "Home":
     # Home page content
-    st.markdown('<h1 class="header">Flower Classification</h1>', unsafe_allow_html=True)
-    
-    st.markdown("""
-    ### Types of Flowers
-    This application is designed to classify images of the following types of flowers:
-    - **Daisy**
-    - **Dandelion**
-    - **Rose**
-    - **Sunflower**
-    - **Tulip**
-
-    Please upload clear images of these flowers for the best classification results.
+    st.title("Flower Classification App 🌸")
+    st.write("""
+    Upload an image of a flower to classify it into one of the following categories:
+    - Daisy
+    - Dandelion
+    - Rose
+    - Sunflower
+    - Tulip
     """)
-    
-    # File uploader for image
-    uploaded_file = st.file_uploader('Upload an Image')
+
+    # File uploader
+    uploaded_file = st.file_uploader('Upload a Flower Image', type=['jpg', 'jpeg', 'png'])
     if uploaded_file is not None:
-        # Display the image in the center
-        st.markdown('<div class="image-container">', unsafe_allow_html=True)
-        st.image(uploaded_file, width=250)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Classify the uploaded image
+        # Display the uploaded image
+        st.image(uploaded_file, caption='Uploaded Image', use_column_width=True)
+
+        # Classify the image
         outcome, results_dict = classify_images(uploaded_file)
-        
-        # Display the classification result beautifully
-        st.markdown('<h2 class="subheader">Classification Result:</h2>', unsafe_allow_html=True)
-        st.markdown(f"<h3 style='text-align: center; color: green;'>{outcome}</h3>", unsafe_allow_html=True)
-        
-        # Display the results as progress bars for each flower category
-        st.markdown('<h2 class="subheader">Prediction Scores:</h2>', unsafe_allow_html=True)
-        for flower, score in results_dict.items():
-            st.markdown(f"**{flower.capitalize()}**")
-            st.progress(score / 100)
+
+        if outcome and results_dict:
+            # Display classification results
+            st.subheader("Classification Result")
+            st.success(outcome)
+
+            # Display prediction scores
+            st.subheader("Prediction Scores")
+            for flower, score in results_dict.items():
+                st.write(f"**{flower}**")
+                st.progress(score / 100)
 
 elif page == "About":
-    st.markdown("""
+    # About page content
+    st.title("About This App")
+    st.write("""
+    This application uses a pre-trained deep learning model to classify images of flowers into one of five categories: Daisy, Dandelion, Rose, Sunflower, and Tulip.
+    
     ### How to Use
-    1. **Upload an Image**: Click the 'Upload an Image' button to choose a flower (categories: Daisy, Dandelion, Rose, Sunflower, and Tulip) image from your device. The image should be in common formats such as JPG, PNG, or JPEG.
-    2. **Image Display**: Once the image is uploaded, it will be displayed in the center of the app for your reference.
-    3. **Classification**: The model will process the image and predict the flower type. The result, including the flower category and confidence score, will be shown prominently on the screen.
-    4. **Prediction Scores**: Below the classification result, you will see prediction scores represented as progress bars for each flower category. These bars illustrate the confidence levels for each class, with a higher bar indicating a higher confidence score.""")
+    1. **Upload an Image**: Use the file uploader to upload an image of a flower.
+    2. **View Results**: The app will classify the image and display the predicted flower type along with confidence scores.
+    3. **Supported Formats**: JPG, PNG, and JPEG are supported.
+    """)
